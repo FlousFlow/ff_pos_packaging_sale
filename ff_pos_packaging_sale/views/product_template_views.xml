@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_view_ff_pos_packaging" model="ir.ui.view">
+        <field name="name">product.template.form.pos.packaging.sale</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="point_of_sale.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <group name="pos" position="inside">
+                <field name="ff_pos_allow_unit_sale"/>
+                <field name="ff_pos_packaging_behavior"/>
+                <field name="ff_pos_default_packaging_id"
+                       invisible="ff_pos_packaging_behavior != 'default'"
+                       domain="[('product_id', 'in', product_variant_ids), ('ff_available_in_pos', '=', True)]"
+                       context="{'default_product_id': product_variant_ids[0], 'default_ff_available_in_pos': True}"/>
+            </group>
+        </field>
+    </record>
+</odoo>

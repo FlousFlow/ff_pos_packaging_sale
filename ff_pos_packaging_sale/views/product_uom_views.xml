@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_uom_list_view_ff_pos_packaging" model="ir.ui.view">
+        <field name="name">product.uom.list.pos.packaging.sale</field>
+        <field name="model">product.uom</field>
+        <field name="inherit_id" ref="product.product_uom_list_view"/>
+        <field name="arch" type="xml">
+            <field name="barcode" position="before">
+                <field name="ff_sequence" widget="handle" invisible="not context.get('ff_pos_packaging')"/>
+                <field name="ff_pos_name" optional="show"/>
+            </field>
+            <field name="uom_id" position="before">
+                <field name="ff_contained_qty" optional="show" string="Contained Qty"/>
+                <field name="ff_pos_price" optional="show" string="POS Price"/>
+                <field name="ff_available_in_pos" optional="show" string="In POS"/>
+                <field name="ff_is_default_pos_packaging" optional="hide" string="POS Default"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="product_uom_action_ff_pos_packaging" model="ir.actions.act_window">
+        <field name="name">POS Packagings</field>
+        <field name="res_model">product.uom</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'ff_pos_packaging': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a commercial packaging for POS
+            </p>
+            <p>
+                Example: Carton containing 24 Units, sold at a fixed POS price.
+                The product stays a single product with a single barcode and its
+                stock keeps moving in base units.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_ff_pos_packagings"
+              name="POS Packagings"
+              action="product_uom_action_ff_pos_packaging"
+              parent="point_of_sale.pos_menu_products_configuration"
+              sequence="3"/>
+</odoo>

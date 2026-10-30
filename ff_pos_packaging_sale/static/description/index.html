@@ -1,0 +1,127 @@
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12">
+            <a href="images/cover_screenshot.png" target="_blank">
+                <img class="oe_picture oe_screenshot" src="images/cover_screenshot.png" style="width:100%;"/>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#1565C0;">POS Packaging Sale</h2>
+        <h3 class="oe_slogan">Sell by Carton &amp; Box — stock keeps moving in base Units</h3>
+        <div class="oe_span12">
+            <p class="text-center" style="font-size:15px;">
+                Let your cashiers sell products by commercial <b>Packaging</b> (Carton, Box, Pack…) in
+                <b>Odoo 19 Community</b> Point of Sale, while the actual stock movement stays in the
+                product's <b>base Unit</b>. One product, one barcode — no separate products, no BoM,
+                no UoM changes.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#1565C0;">How it works</h2>
+        <div class="oe_span12">
+            <table class="table table-striped text-center" style="font-size:15px;">
+                <thead>
+                    <tr><th>Surface</th><th>The customer sees</th><th>Internally</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>POS order line</td><td><b>2 Carton × 290.00 = 580.00</b></td><td>qty = 2 (commercial count)</td></tr>
+                    <tr><td>Receipt</td><td><b>2 Carton</b></td><td>—</td></tr>
+                    <tr><td>Invoice report</td><td><b>2 Carton</b></td><td>accounting stays standard</td></tr>
+                    <tr><td>Stock picking / move</td><td>—</td><td><b>48 Units</b> (2 × 24), base UoM</td></tr>
+                    <tr><td>Taxes</td><td colspan="2">computed on the <b>packaging price</b> (290 × 2), never on 48 × unit price</td></tr>
+                    <tr><td>Refund</td><td><b>-1 Carton</b></td><td><b>+24 Units</b> returned to stock</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#1565C0;">Screenshots</h2>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">Cashier-friendly packaging picker</h3>
+        <div class="oe_span12">
+            <a href="images/packaging_popup.png" target="_blank">
+                <img class="oe_picture oe_screenshot" src="images/packaging_popup.png" style="width:100%;"/>
+            </a>
+        </div>
+        <div class="oe_span12 text-center text-muted">
+            Each option shows the packaging name, contained quantity and price.
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">Commercial quantity on the order — "2 Carton"</h3>
+        <div class="oe_span12">
+            <a href="images/orderline_2_carton.png" target="_blank">
+                <img class="oe_picture oe_screenshot" src="images/orderline_2_carton.png" style="width:100%;"/>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h3 class="oe_slogan">Receipt in the unit the customer bought</h3>
+        <div class="oe_span12">
+            <a href="images/receipt_2_carton.png" target="_blank">
+                <img class="oe_picture oe_screenshot" src="images/receipt_2_carton.png" style="width:100%;"/>
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#1565C0;">Features</h2>
+        <div class="oe_span12">
+            <ul style="font-size:15px; line-height:1.9;">
+                <li><b>Packaging POS fields</b> on the Odoo 19 packaging model: Available in POS, POS Name, POS Price, Default in POS, Sequence.</li>
+                <li><b>Per-product behavior</b>: Default Packaging / Ask Every Time / Unit by Default — or inherit the POS config default.</li>
+                <li><b>Fixed packaging prices</b> independent of the unit price (Carton = 290, not 24 × 15), with a documented fallback: contained qty × pricelist unit price.</li>
+                <li><b>Structured data</b> on order lines and invoice lines (no description-string hacks): packaging, count, contained qty, base-UoM qty — ready for reporting.</li>
+                <li><b>Refunds keep the packaging semantics</b>: refund 1 Carton, stock gets 24 Units back.</li>
+                <li><b>Offline-safe</b>: packaging data is loaded with the POS payload and synced back with the order.</li>
+                <li><b>Multi-company safe</b>: packagings keep their company; POS loads only packagings of the loaded products.</li>
+                <li><b>Inventory / COGS untouched</b>: stock moves stay in the base UoM; valuation, FIFO/AVCO and margins use the converted quantity.</li>
+                <li><b>Automated tests</b> covering stock conversion, taxes, refunds, sync fields and all business constraints.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container">
+    <div class="oe_row oe_spaced">
+        <h2 class="oe_slogan" style="color:#1565C0;">Configuration</h2>
+        <div class="oe_span12">
+            <ol style="font-size:15px; line-height:1.9;">
+                <li>Open <b>Point of Sale → Configuration → POS Packagings</b>.</li>
+                <li>For each packaging: choose the contained unit, set the POS name &amp; price, tick <i>Available in POS</i> (+ <i>Default in POS</i> if needed).</li>
+                <li>On the product form → <i>Point of Sale</i> page: choose the <i>Packaging Selection Behavior</i>, or leave it as <i>Per POS Config</i>.</li>
+            </ol>
+        </div>
+    </div>
+</section>
+
+<section class="oe_container oe_dark">
+    <div class="oe_row oe_spaced">
+        <div class="oe_span12 text-center text-muted">
+            Developed by <b>Flous Flow</b> · <a href="https://flousflow.com">flousflow.com</a>
+        </div>
+    </div>
+</section>
