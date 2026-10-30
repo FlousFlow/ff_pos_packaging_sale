@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_document_ff_pos_packaging" inherit_id="account.report_invoice_document">
+        <xpath expr="//td[@name='td_quantity']" position="replace">
+            <td name="td_quantity" class="o_td_quantity text-end">
+                <!-- FF: POS packaging sale — show the commercial unit (e.g. "2 Carton"),
+                     the accounting quantity itself stays the commercial count x packaging price -->
+                <t t-if="line.ff_pos_packaging_id or line.ff_pos_packaging_uom_id">
+                    <span class="text-nowrap">
+                        <span t-out="line.ff_commercial_packaging_count"
+                              t-options="{'widget': 'float', 'decimal_precision': 'Product Unit'}">2.00</span>
+                        <span> </span>
+                        <span t-out="line.ff_pos_packaging_id.ff_pos_display_name or line.ff_pos_packaging_uom_id.name">Carton</span>
+                    </span>
+                </t>
+                <t t-else="">
+                    <span t-field="line.quantity" class="text-nowrap">3.00</span>
+                    <span t-field="line.product_uom_id" groups="uom.group_uom">units</span>
+                    <span t-if="line.product_uom_id != line.product_id.uom_id" groups="uom.group_uom" class="text-muted small">
+                        <br/>
+                        <t t-set="product_uom_qty"
+                           t-value="line.product_uom_id._compute_quantity(line.quantity, line.product_id.uom_id)"/>
+                        <span t-out="product_uom_qty"
+                              t-options="{'widget': 'float', 'decimal_precision': 'Product Unit'}" data-oe-demo="3.00"/>
+                        <span t-field="line.product_id.uom_id" data-oe-demo="units"/>
+                    </span>
+                </t>
+            </td>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <!-- FF: show the commercial packaging unit next to the quantity ("2 Carton") -->
+        <xpath expr="//span[hasclass('qty')]" position="inside">
+            <small t-if="vals.packagingName" t-out="' ' + vals.packagingName" class="fw-normal" style="font-size: 85%;"/>
+        </xpath>
+    </t>
+
+</templates>
