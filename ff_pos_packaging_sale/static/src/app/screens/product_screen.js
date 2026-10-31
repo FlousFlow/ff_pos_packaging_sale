@@ -104,8 +104,14 @@ patch(ProductScreen.prototype, {
         // barcode links, so expose them as lightweight picker descriptors.
         const tmpl = variant.product_tmpl_id;
         const baseFactor = tmpl?.uom_id?.factor || 1;
+        // A packaging can be configured both as a product-specific barcode
+        // unit and as a standard product UoM. Prefer the barcode record so the
+        // cashier sees one choice with the configured label and barcode.
+        const barcodeUomIds = new Set(
+            barcodePackagings.map((packaging) => packaging.uom_id?.id).filter(Boolean)
+        );
         const standardPackagings = (tmpl?.uom_ids || [])
-            .filter((uom) => uom?.id && uom.id !== tmpl.uom_id?.id)
+            .filter((uom) => uom?.id && uom.id !== tmpl.uom_id?.id && !barcodeUomIds.has(uom.id))
             .map((uom) => ({
                 ff_is_template_uom: true,
                 ff_uom_record: uom,
