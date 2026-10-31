@@ -2,13 +2,13 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="ff_pos_packaging_sale.PackagingSelectionPopup">
-        <Dialog title="props.product.display_name" contentClass="">
+        <Dialog title="this.props.product.display_name" contentClass="">
             <div class="d-flex flex-column gap-2 p-2">
-                <t t-foreach="rows" t-as="row" t-key="row_index">
+                <t t-foreach="this.rows" t-as="row" t-key="row_index">
                     <button class="btn btn-outline-secondary d-flex justify-content-between align-items-center py-3 px-3"
                             t-on-click="() => this.confirm(row)">
                         <span class="fw-bolder fs-4" t-esc="row.name"/>
-                        <span class="text-muted" t-esc="row.contained + ' ' + (props.product.product_tmpl_id.uom_id?.name or '')"/>
+                        <span class="text-muted" t-esc="row.contained + ' ' + (this.props.product.product_tmpl_id.uom_id?.name or '')"/>
                         <span class="fw-bolder fs-4"
                               t-esc="row.price === null ? '' : this.formatPrice(row.price)"/>
                     </button>

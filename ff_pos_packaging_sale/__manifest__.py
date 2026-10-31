@@ -1,7 +1,7 @@
 # Part of Flous Flow. See LICENSE file for full copyright and licensing details.
 {
     'name': 'POS Packaging Sale',
-    'version': '20.0.1.0.3',
+    'version': '20.0.1.0.4',
     'category': 'Sales/Point of Sale',
     'summary': 'Prompt for the selling unit in POS and Sales and keep stock in base UoM',
     'description': """

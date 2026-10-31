@@ -3,7 +3,7 @@
     <t t-name="ff_pos_packaging_sale.SalePackagingSelectionDialog">
         <Dialog title="'Choose a selling unit'">
             <div class="d-flex flex-column gap-2 p-2">
-                <button t-foreach="props.choices" t-as="choice" t-key="choice.id"
+                <button t-foreach="this.props.choices" t-as="choice" t-key="choice.id"
                         class="btn btn-outline-secondary text-start py-3"
                         t-on-click="() => this.select(choice)">
                     <span class="fw-bold" t-esc="choice.name"/>

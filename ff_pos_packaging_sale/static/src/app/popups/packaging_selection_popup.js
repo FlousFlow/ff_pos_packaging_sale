@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component } from "@odoo/owl";
+import { Component, t, useProps } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { formatCurrency } from "@web/core/currency";
 
@@ -15,7 +15,14 @@ import { formatCurrency } from "@web/core/currency";
 export class PackagingSelectionPopup extends Component {
     static template = "ff_pos_packaging_sale.PackagingSelectionPopup";
     static components = { Dialog };
-    static props = ["close", "product", "packagings", "pricelist", "getPayload?"];
+    props = useProps({
+        close: t.function(),
+        product: t.any(),
+        packagings: t.array(),
+        canSellUnit: t.boolean().optional(false),
+        pricelist: t.any().optional(null),
+        getPayload: t.function().optional(),
+    });
 
     setup() {
         this.pos = usePos();
