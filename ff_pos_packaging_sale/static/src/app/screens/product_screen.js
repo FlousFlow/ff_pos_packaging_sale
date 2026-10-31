@@ -34,6 +34,21 @@ patch(ProductScreen.prototype, {
     },
 
     async _barcodeProductAction(code) {
+        const barcode = code.base_code;
+        const strippedBarcode = /^0\d+$/.test(barcode) ? String(parseInt(barcode, 10)) : null;
+        const packaging =
+            this.pos.models["product.uom"].getBy("barcode", barcode) ||
+            (strippedBarcode && this.pos.models["product.uom"].getBy("barcode", strippedBarcode));
+        if (packaging?.ff_available_in_pos && packaging.product_id) {
+            const product = packaging.product_id;
+            this.sound.play("beep");
+            if (!(await this.pos.canAddProductToCurrentOrder(product.product_tmpl_id))) {
+                return;
+            }
+            await this._ffAddPackagingLine(product, packaging);
+            this.numberBuffer.reset();
+            return;
+        }
         const product = await this._getProductByBarcode(code);
         if (!product) {
             return super._barcodeProductAction(code);
