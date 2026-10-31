@@ -11,7 +11,6 @@
             </field>
             <field name="uom_id" position="before">
                 <field name="ff_contained_qty" optional="show" string="Contained Qty"/>
-                <field name="ff_pos_price" optional="show" string="Fallback POS Price"/>
                 <field name="ff_available_in_pos" optional="show" string="In POS"/>
             </field>
         </field>
@@ -27,7 +26,7 @@
                 Create a commercial packaging for POS
             </p>
             <p>
-                Example: Carton containing 24 Units, sold at a fixed POS price.
+                Example: Carton containing 24 Units. POS applies quantity-based pricelist rules or multiplies the product unit price by 24.
                 The product stays a single product with a single barcode and its
                 stock keeps moving in base units.
             </p>

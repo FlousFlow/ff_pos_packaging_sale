@@ -84,7 +84,7 @@ class TestPosPackagingSale(TestPoSCommon):
     # ------------------------------------------------------------------
     def _order_line_vals(self, product, packaging=None, count=0, price=None, taxes=None):
         unit_price = price if price is not None else (
-            packaging.ff_pos_price if packaging else product.list_price
+            product.list_price * packaging.ff_contained_qty if packaging else product.list_price
         )
         subtotal = unit_price * count
         vals = {
@@ -192,8 +192,8 @@ class TestPosPackagingSale(TestPoSCommon):
         ][0]
         self.assertEqual(product_line_data['quantity'], 2,
                          "invoice quantity = commercial count")
-        self.assertEqual(product_line_data['price_unit'], 290.0,
-                         "invoice price = packaging price")
+        self.assertEqual(product_line_data['price_unit'], 360.0,
+                         "invoice price = base unit price x package quantity")
         self.assertEqual(product_line_data['ff_pos_packaging_id'], self.packaging_carton.id)
         self.assertEqual(product_line_data['ff_commercial_packaging_count'], 2)
         self.assertEqual(product_line_data['ff_commercial_packaging_qty'], 24)
@@ -221,7 +221,7 @@ class TestPosPackagingSale(TestPoSCommon):
         self.assertEqual(return_move.product_uom_qty, 24)
 
     # ------------------------------------------------------------------
-    # TEST 5 — Packaging price independence (Carton 290 != 24 x 15 = 360)
+    # TEST 5 — Packaging price follows base UoM quantity (Carton = 24 x 15)
     # ------------------------------------------------------------------
     def test_05_packaging_price_independent(self):
         order = self._create_order([
@@ -229,9 +229,9 @@ class TestPosPackagingSale(TestPoSCommon):
         ])
         order._compute_prices()
         line = order.lines
-        self.assertEqual(line.price_unit, 290.0)
-        self.assertEqual(line.price_subtotal, 290.0,
-                         "total is the packaging price, not 24 x unit price")
+        self.assertEqual(line.price_unit, 360.0)
+        self.assertEqual(line.price_subtotal, 360.0,
+                         "package total follows base unit sale price x contained quantity")
 
     # ------------------------------------------------------------------
     # TEST 6 — Barcode uniqueness of packaging (data side of scanning)
@@ -267,15 +267,16 @@ class TestPosPackagingSale(TestPoSCommon):
                       'ff_packaging_count', 'ff_packaging_unit_price'):
             self.assertIn(field, loaded)
         pkg_loaded = self.env['product.uom']._load_pos_data_fields(self.pos_config)
-        for field in ('ff_available_in_pos', 'ff_pos_price', 'ff_pos_name',
+        for field in ('ff_available_in_pos', 'ff_pos_name',
                       'ff_sequence', 'ff_contained_qty'):
             self.assertIn(field, pkg_loaded)
+        self.assertNotIn('ff_pos_price', pkg_loaded)
         tmpl_loaded = self.env['product.template']._load_pos_data_fields(self.pos_config)
         for field in ('uom_ids',):
             self.assertIn(field, tmpl_loaded)
 
     # ------------------------------------------------------------------
-    # TEST 9 — Taxes on packaging price (Carton 290 + 14% = 330.60)
+    # TEST 9 — Taxes on calculated package total (Carton 360 + 14% = 410.40)
     # ------------------------------------------------------------------
     def test_09_taxes_on_packaging_price(self):
         self.product_pepsi.taxes_id = [Command.set(self.tax_14.ids)]
@@ -287,12 +288,11 @@ class TestPosPackagingSale(TestPoSCommon):
         ])
         order._compute_prices()
         line = order.lines
-        self.assertEqual(line.price_subtotal, 290.0)
-        self.assertAlmostEqual(line.price_subtotal_incl, 330.60, places=3,
-                               msg="290 + 14% VAT = 330.60 (tax on packaging price)")
-        # tax base must be 290 (packaging price), never 24 x 15
+        self.assertEqual(line.price_subtotal, 360.0)
+        self.assertAlmostEqual(line.price_subtotal_incl, 410.40, places=3,
+                               msg="360 + 14% VAT = 410.40 (tax on calculated package total)")
         base_lines = line._prepare_base_lines_for_taxes_computation()
-        self.assertEqual(sum(bl['price_unit'] * bl['quantity'] for bl in base_lines), 290.0)
+        self.assertEqual(sum(bl['price_unit'] * bl['quantity'] for bl in base_lines), 360.0)
         self.product_pepsi.taxes_id = [Command.clear()]
 
     # ------------------------------------------------------------------

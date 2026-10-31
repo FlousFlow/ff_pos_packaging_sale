@@ -1,7 +1,7 @@
 # Part of Flous Flow. See LICENSE file for full copyright and licensing details.
 {
     'name': 'POS Packaging Sale',
-    'version': '20.0.1.0.2',
+    'version': '20.0.1.0.3',
     'category': 'Sales/Point of Sale',
     'summary': 'Prompt for the selling unit in POS and Sales and keep stock in base UoM',
     'description': """
@@ -14,8 +14,9 @@ Key principles:
 - One product, one barcode — no separate products or BoMs per packaging
 - The customer sees "2 Carton" on the POS screen, receipt and invoice
 - Stock picking / stock move deducts 48 Units internally (2 x 24)
-- Applicable pricelist rules determine packaging prices; optional packaging prices are fallback values
-- Taxes are computed on the packaging price
+- Pricelist quantity thresholds use the package's contained-unit quantity; the resulting unit price is multiplied by the package quantity
+- Without an applicable pricelist rule, the product sale price is multiplied by the package quantity
+- Taxes are computed on the resulting package price
 - Partial refunds keep the same commercial unit (-1 Carton => +24 Units)
 - Structured packaging data is stored on pos.order.line and account.move.line
 """,

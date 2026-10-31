@@ -5,21 +5,6 @@ import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { PackagingSelectionPopup } from "@ff_pos_packaging_sale/app/popups/packaging_selection_popup";
 
-export function hasApplicablePricelistRule(product, pricelist, quantity) {
-    if (!pricelist) return false;
-    const template = product.product_tmpl_id;
-    const model = product.models["product.pricelist.item"];
-    const variantRule = pricelist.findBestRule(pricelist.getRulesByProductId(product.id), quantity);
-    const templateRule = pricelist.findBestRule(pricelist.getRulesByTmplId(template.id), quantity);
-    if (variantRule || templateRule) return true;
-    const categoryRuleIds = pricelist.getCategoryRulesIds(template.parentCategories);
-    const categoryRule = categoryRuleIds.length
-        && pricelist.findBestRule(model.readMany(categoryRuleIds), quantity);
-    if (categoryRule) return true;
-    const globalRuleIds = pricelist.getGlobalRulesIds();
-    return Boolean(globalRuleIds.length && pricelist.findBestRule(model.readMany(globalRuleIds), quantity));
-}
-
 patch(ProductScreen.prototype, {
     async addProductToOrder(product) {
         // Configurable products must first pass through Odoo's configurator so
@@ -163,11 +148,8 @@ patch(ProductScreen.prototype, {
         });
     },
 
-    /**
-     * Pricelist price always wins. Explicit packaging price is a fallback
-     * only when the active pricelist has no applicable rule.
-     */
-    _ffPackagingPrice(variant, packaging, contained) {
+    /** Price one package using the pricelist at its contained-unit quantity. */
+    _ffPackagingPrice(variant, _packaging, contained) {
         const pricelist = this.currentOrder?.pricelist_id;
         try {
             const unitPrice = variant.product_tmpl_id.getPrice(
@@ -177,14 +159,9 @@ patch(ProductScreen.prototype, {
                 false,
                 variant
             );
-            const hasRule = this._ffHasPricelistRule(variant, pricelist, contained);
-            return hasRule || !packaging?.ff_pos_price ? unitPrice * contained : packaging.ff_pos_price;
+            return unitPrice * contained;
         } catch {
-            return packaging?.ff_pos_price || variant.product_tmpl_id.list_price * contained;
+            return variant.product_tmpl_id.list_price * contained;
         }
-    },
-
-    _ffHasPricelistRule(variant, pricelist, quantity) {
-        return hasApplicablePricelistRule(variant, pricelist, quantity);
     },
 });

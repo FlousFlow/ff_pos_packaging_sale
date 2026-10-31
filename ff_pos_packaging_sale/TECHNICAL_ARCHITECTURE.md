@@ -5,7 +5,7 @@
 - When a product has configured commercial packagings, POS asks for the selling unit every time it is selected.
 - The POS picker combines product-specific barcode packagings (`product.uom`) with the product template's configured UoMs.
 - Sales orders use the native `product_uom_id` field. Odoo computes the line price using the order pricelist and selected UoM.
-- POS packaging prices are fallback prices only when no applicable pricelist rule exists.
+- POS evaluates pricelist rules at the package's contained-unit quantity, then multiplies the resulting unit price by that quantity. If no rule applies, it uses the product sale price per unit times the contained quantity.
 - Stock quantities convert back to the product base UoM at Odoo 20's POS stock hooks.
 - POS invoices retain structured packaging metadata on invoice lines.
 

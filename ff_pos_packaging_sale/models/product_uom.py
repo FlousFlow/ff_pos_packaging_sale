@@ -27,8 +27,8 @@ class ProductUom(models.Model):
     ff_pos_price = fields.Float(
         string='POS Price',
         digits='Product Price',
-        help="Fallback POS selling price for ONE packaging when the active pricelist "
-             "has no applicable rule. An applicable pricelist rule always takes precedence.",
+        help="Legacy value retained for compatibility. POS package prices are now calculated "
+             "from the product sale price or applicable quantity-based pricelist rule.",
     )
     ff_sequence = fields.Integer(string='Sequence', default=10)
     ff_contained_qty = fields.Float(
@@ -101,4 +101,4 @@ class ProductUom(models.Model):
     @api.model
     def _load_pos_data_fields(self, config):
         return ['id', 'barcode', 'product_id', 'uom_id', 'ff_available_in_pos',
-                'ff_pos_name', 'ff_pos_price', 'ff_sequence', 'ff_contained_qty']
+                'ff_pos_name', 'ff_sequence', 'ff_contained_qty']

@@ -81,9 +81,7 @@ patch(PosOrderline.prototype, {
                 false,
                 this.product_id
             );
-            const hasRule = this.order_id._ffHasPackagingPricelistRule(this, quantity);
-            const fallback = this.ff_packaging_id?.ff_pos_price;
-            this.setUnitPrice(hasRule || !fallback ? unitPrice * contained : fallback);
+            this.setUnitPrice(unitPrice * contained);
             return;
         }
         return super.recomputeUnitPrice(...arguments);

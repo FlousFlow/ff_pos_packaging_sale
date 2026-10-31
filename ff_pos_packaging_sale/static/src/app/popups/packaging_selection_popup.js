@@ -4,7 +4,6 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { Component } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { formatCurrency } from "@web/core/currency";
-import { hasApplicablePricelistRule } from "@ff_pos_packaging_sale/app/screens/product_screen";
 
 /**
  * Fast cashier-friendly packaging picker.
@@ -51,26 +50,18 @@ export class PackagingSelectionPopup extends Component {
     }
 
     _price(packaging, contained) {
-        if (!packaging && !this.props.pricelist) {
-            return this.props.product.product_tmpl_id.list_price;
-        }
-        if (!this.props.pricelist && packaging?.ff_pos_price) {
-            return packaging.ff_pos_price;
-        }
+        const template = this.props.product.product_tmpl_id;
         try {
-            const unitPrice = this.props.product.product_tmpl_id.getPrice(
-                this.props.pricelist,
+            const unitPrice = template.getPrice(
+                this.props.pricelist || null,
                 contained,
                 0,
                 false,
                 this.props.product
             );
-            const hasRule = hasApplicablePricelistRule(
-                this.props.product, this.props.pricelist, contained
-            );
-            return hasRule || !packaging?.ff_pos_price ? unitPrice * contained : packaging.ff_pos_price;
+            return unitPrice * contained;
         } catch {
-            return packaging?.ff_pos_price || this.props.product.product_tmpl_id.list_price * contained;
+            return template.list_price * contained;
         }
     }
 
