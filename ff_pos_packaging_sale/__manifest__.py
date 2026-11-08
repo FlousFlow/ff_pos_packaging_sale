@@ -1,9 +1,9 @@
 # Part of Flous Flow. See LICENSE file for full copyright and licensing details.
 {
     'name': 'POS Packaging Sale',
-    'version': '20.0.1.0.4',
+    'version': '20.0.1.0.5',
     'category': 'Sales/Point of Sale',
-    'summary': 'Prompt for the selling unit in POS and Sales and keep stock in base UoM',
+    'summary': 'Sell packaging barcodes directly in POS and choose units in Sales',
     'description': """
 POS Packaging Sale
 ==================
@@ -26,7 +26,6 @@ Key principles:
     'license': 'LGPL-3',
     'images': [
         'static/description/images/cover_screenshot.png',
-        'static/description/images/packaging_popup.png',
         'static/description/images/orderline_2_carton.png',
         'static/description/images/receipt_2_carton.png',
     ],

@@ -52,14 +52,9 @@
 
 <section class="oe_container">
     <div class="oe_row oe_spaced">
-        <h3 class="oe_slogan">Cashier-friendly packaging picker</h3>
-        <div class="oe_span12">
-            <a href="images/packaging_popup.png" target="_blank">
-                <img class="oe_picture oe_screenshot" src="images/packaging_popup.png" style="width:100%;"/>
-            </a>
-        </div>
+        <h3 class="oe_slogan">Packaging barcode selects its unit directly</h3>
         <div class="oe_span12 text-center text-muted">
-            Each option shows the packaging name, contained quantity and price.
+            Regular product selection uses the base unit. Scanning a packaging barcode adds that package directly without an extra choice screen.
         </div>
     </div>
 </section>
@@ -91,8 +86,8 @@
         <h2 class="oe_slogan" style="color:#1565C0;">Features</h2>
         <div class="oe_span12">
             <ul style="font-size:15px; line-height:1.9;">
-                <li><b>Packaging POS fields</b> on the Odoo 19 packaging model: Available in POS, POS Name, POS Price, Default in POS, Sequence.</li>
-                <li><b>Per-product behavior</b>: Default Packaging / Ask Every Time / Unit by Default — or inherit the POS config default.</li>
+                <li><b>Packaging barcode fields</b> on the product packaging record: Available in POS, POS Name, POS Price, Sequence and contained quantity.</li>
+                <li><b>Direct POS flow</b>: product clicks and regular product barcodes add the base unit; a packaging barcode directly selects its configured package.</li>
                 <li><b>Fixed packaging prices</b> independent of the unit price (Carton = 290, not 24 × 15), with a documented fallback: contained qty × pricelist unit price.</li>
                 <li><b>Structured data</b> on order lines and invoice lines (no description-string hacks): packaging, count, contained qty, base-UoM qty — ready for reporting.</li>
                 <li><b>Refunds keep the packaging semantics</b>: refund 1 Carton, stock gets 24 Units back.</li>
@@ -111,8 +106,8 @@
         <div class="oe_span12">
             <ol style="font-size:15px; line-height:1.9;">
                 <li>Open <b>Point of Sale → Configuration → POS Packagings</b>.</li>
-                <li>For each packaging: choose the contained unit, set the POS name &amp; price, tick <i>Available in POS</i> (+ <i>Default in POS</i> if needed).</li>
-                <li>On the product form → <i>Point of Sale</i> page: choose the <i>Packaging Selection Behavior</i>, or leave it as <i>Per POS Config</i>.</li>
+                <li>For each product packaging barcode: choose the UoM, set the contained quantity, optional POS name and price, and tick <i>Available in POS</i>.</li>
+                <li>Scan the product's regular barcode to add the base unit, or scan an enabled packaging barcode to add the matching packaging directly.</li>
             </ol>
         </div>
     </div>

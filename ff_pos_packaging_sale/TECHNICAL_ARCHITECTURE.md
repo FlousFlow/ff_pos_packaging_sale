@@ -2,16 +2,16 @@
 
 ## Selling behavior
 
-- When a product has configured commercial packagings, POS asks for the selling unit every time it is selected.
-- The POS picker combines product-specific barcode packagings (`product.uom`) with the product template's configured UoMs.
+- Product-card selection and regular product-barcode scans use the standard POS flow and add the product in its base UoM, without opening a unit picker.
+- Scanning an enabled product-specific packaging barcode (`product.uom`) adds that packaging directly, because the barcode already identifies the selling unit.
 - Sales orders use the native `product_uom_id` field. Odoo computes the line price using the order pricelist and selected UoM.
 - POS evaluates pricelist rules at the package's contained-unit quantity, then multiplies the resulting unit price by that quantity. If no rule applies, it uses the product sale price per unit times the contained quantity.
 - Stock quantities convert back to the product base UoM at Odoo 20's POS stock hooks.
 - POS invoices retain structured packaging metadata on invoice lines.
 
-## Removed settings
+## POS interaction
 
-The product-level Ask/Default/Unit mode and POS configuration behavior selector were removed. They contradicted the rule that configured packaging always prompts at selection time.
+The POS packaging-selection popup is not used. Sales orders retain their native packaging UoM selector. Packaging metadata and price/stock conversion remain recorded for packaging-barcode sales.
 
 ## Compatibility boundary
 
