@@ -21,3 +21,25 @@ class ProductProduct(models.Model):
         products = self.browse(packaging_ids).filtered(lambda product: product.id not in existing_ids)
         remaining = max(limit - len(result), 0) if limit else len(products)
         return result + [(product.id, product.display_name) for product in products[:remaining]]
+
+    @api.model
+    def web_name_search(self, name, specification, domain=None, operator="ilike", limit=100):
+        """Include packaging barcode matches in the web product autocomplete."""
+        records = super().web_name_search(name, specification, domain, operator, limit)
+        if not name:
+            return records
+        product_domain = list(domain or [])
+        packaging = self.env["product.uom"].sudo().search([
+            ("barcode", "=", name), ("product_id", "!=", False),
+        ])
+        products = packaging.mapped("product_id").filtered_domain(product_domain)
+        existing_ids = {record["id"] for record in records}
+        extra = products.filtered(lambda product: product.id not in existing_ids)[:max(limit - len(records), 0)]
+        if extra:
+            records.extend(extra.web_read(specification))
+            for read_vals, product in zip(records[-len(extra):], extra):
+                if "display_name" in specification:
+                    read_vals["__formatted_display_name"] = product.with_context(
+                        formatted_display_name=True
+                    ).display_name
+        return records
