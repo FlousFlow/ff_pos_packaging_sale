@@ -10,7 +10,7 @@ patch(ProductScreen.prototype, {
         const packaging =
             this.pos.models["product.uom"].getBy("barcode", barcode) ||
             (strippedBarcode && this.pos.models["product.uom"].getBy("barcode", strippedBarcode));
-        if (packaging?.ff_available_in_pos && packaging.product_id) {
+        if (packaging?.product_id) {
             const product = packaging.product_id;
             this.sound.play("beep");
             if (!(await this.pos.canAddProductToCurrentOrder(product.product_tmpl_id))) {
