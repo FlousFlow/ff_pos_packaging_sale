@@ -106,10 +106,17 @@ patch(Many2OneBarcodeField.prototype, {
                 const input = this.el?.querySelector("input");
                 const barcode = input?.value?.trim();
                 const result = await originalUpdate(value);
-                if (value?.id && /^\d{5,}$/.test(barcode || "")) {
+                const isSaleProduct =
+                    this.props.record.resModel === "sale.order.line" &&
+                    ["product.template", "product.product"].includes(this.props.relation);
+                if (isSaleProduct && value?.id && /^\d{5,}$/.test(barcode || "")) {
+                    const relation = this.props.relation;
+                    const productDomain = relation === "product.template"
+                        ? [["product_id.product_tmpl_id", "=", value.id]]
+                        : [["product_id", "=", value.id]];
                     const [packaging] = await this.env.services.orm.searchRead(
                         "product.uom",
-                        [["barcode", "=", barcode], ["product_id", "=", value.id]],
+                        [["barcode", "=", barcode], ...productDomain],
                         ["uom_id"],
                         { limit: 1 }
                     );
