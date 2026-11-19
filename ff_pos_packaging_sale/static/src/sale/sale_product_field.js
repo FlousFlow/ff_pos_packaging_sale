@@ -2,8 +2,57 @@
 
 import { patch } from "@web/core/utils/patch";
 import { Many2OneBarcodeField } from "@web/views/fields/many2one_barcode/many2one_barcode_field";
+import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
+import { SaleLabelTextField } from "@sale/js/sale_label_text/sale_label_text";
 import { SaleOrderLineProductField } from "@sale/js/sale_product_field/sale_product_field";
 import { SalePackagingSelectionDialog } from "@ff_pos_packaging_sale/sale/packaging_selection_dialog";
+
+let ffPackagingSearchBarcode = null;
+
+patch(Many2XAutocomplete.prototype, {
+    buildRecordSuggestion(request, record) {
+        const suggestion = super.buildRecordSuggestion(...arguments);
+        const selectRecord = suggestion.onSelect;
+        suggestion.onSelect = () => {
+            ffPackagingSearchBarcode = /^\d{5,}$/.test(request) ? request : null;
+            return selectRecord();
+        };
+        return suggestion;
+    },
+});
+
+patch(SaleLabelTextField.prototype, {
+    async updateMany2XProduct(record) {
+        const barcode = ffPackagingSearchBarcode;
+        this._ffPackagingSearchBarcode = /^\d{5,}$/.test(barcode || "") ? barcode : null;
+        ffPackagingSearchBarcode = null;
+        return super.updateMany2XProduct(...arguments);
+    },
+
+    async _onProductTemplateUpdate() {
+        await super._onProductTemplateUpdate(...arguments);
+        const barcode = this._ffPackagingSearchBarcode;
+        this._ffPackagingSearchBarcode = null;
+        const template = this.props.record.data.product_template_id;
+        if (!barcode || !template?.id) {
+            return;
+        }
+        const [packaging] = await this.orm.searchRead(
+            "product.uom",
+            [["barcode", "=", barcode], ["product_id.product_tmpl_id", "=", template.id]],
+            ["uom_id"],
+            { limit: 1 }
+        );
+        if (packaging?.uom_id?.[0]) {
+            await this.props.record.update({
+                product_uom_id: {
+                    id: packaging.uom_id[0],
+                    display_name: packaging.uom_id[1],
+                },
+            });
+        }
+    },
+});
 
 patch(SaleOrderLineProductField.prototype, {
     get m2oProps() {
@@ -93,9 +142,7 @@ patch(SaleOrderLineProductField.prototype, {
     },
 });
 
-// The Sales Order line uses the many2one_barcode widget, not the regular
-// SaleOrderLineProductField component. Wrap its update callback so barcode
-// matches set the corresponding packaging UoM after the product is selected.
+// Support fields that use the many2one_barcode widget when it is present.
 patch(Many2OneBarcodeField.prototype, {
     get m2oProps() {
         const props = super.m2oProps;
@@ -107,7 +154,7 @@ patch(Many2OneBarcodeField.prototype, {
                 const barcode = input?.value?.trim();
                 const result = await originalUpdate(value);
                 const isSaleProduct =
-                    this.props.record.resModel === "sale.order.line" &&
+                    ["product_id", "product_template_id"].includes(this.props.name) &&
                     ["product.template", "product.product"].includes(this.props.relation);
                 if (isSaleProduct && value?.id && /^\d{5,}$/.test(barcode || "")) {
                     const relation = this.props.relation;
