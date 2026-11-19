@@ -5,6 +5,38 @@ import { SaleOrderLineProductField } from "@sale/js/sale_product_field/sale_prod
 import { SalePackagingSelectionDialog } from "@ff_pos_packaging_sale/sale/packaging_selection_dialog";
 
 patch(SaleOrderLineProductField.prototype, {
+    get m2oProps() {
+        const props = super.m2oProps;
+        const originalUpdate = props.update;
+        return {
+            ...props,
+            update: async (value) => {
+                const input = this.el?.querySelector('input');
+                const query = input?.value?.trim() || props.value?.display_name || '';
+                const result = await originalUpdate(value);
+                if (!value?.id || !/^\d{5,}$/.test(query)) {
+                    return result;
+                }
+                await this._ffSelectScannedPackaging(value.id, query);
+                return result;
+            },
+        };
+    },
+
+    async _ffSelectScannedPackaging(productId, barcode) {
+        const [packaging] = await this.orm.searchRead(
+            "product.uom",
+            [["barcode", "=", barcode], ["product_id", "=", productId]],
+            ["uom_id"],
+            { limit: 1 }
+        );
+        if (packaging?.uom_id?.[0]) {
+            await this.props.record.update({
+                product_uom_id: { id: packaging.uom_id[0], display_name: packaging.uom_id[1] },
+            });
+        }
+    },
+
     async _onProductUpdate() {
         const scannedBarcode = this.el?.querySelector('input')?.value?.trim();
         await super._onProductUpdate(...arguments);
