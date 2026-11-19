@@ -6,10 +6,28 @@ import { SalePackagingSelectionDialog } from "@ff_pos_packaging_sale/sale/packag
 
 patch(SaleOrderLineProductField.prototype, {
     async _onProductUpdate() {
+        const scannedBarcode = this.el?.querySelector('input')?.value?.trim();
         await super._onProductUpdate(...arguments);
         const product = this.props.record.data.product_id;
         if (!product?.id) return;
         if (this.props.record.data.is_downpayment || this.props.record.data.display_type) return;
+        if (scannedBarcode) {
+            const [packaging] = await this.orm.searchRead(
+                "product.uom",
+                [["barcode", "=", scannedBarcode], ["product_id", "=", product.id]],
+                ["uom_id", "ff_pos_name", "ff_pos_display_name", "ff_contained_qty"],
+                { limit: 1 }
+            );
+            if (packaging?.uom_id?.[0]) {
+                await this.props.record.update({
+                    product_uom_id: {
+                        id: packaging.uom_id[0],
+                        display_name: packaging.uom_id[1],
+                    },
+                });
+                return;
+            }
+        }
         const [productData] = await this.orm.read("product.product", [product.id], ["product_tmpl_id"]);
         const [template] = await this.orm.read("product.template", [productData.product_tmpl_id[0]], ["uom_id", "uom_ids"]);
         const choices = [...new Set([template.uom_id[0], ...template.uom_ids])];
