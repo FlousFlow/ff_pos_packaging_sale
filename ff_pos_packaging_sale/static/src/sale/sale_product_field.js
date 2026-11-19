@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { patch } from "@web/core/utils/patch";
+import { Many2OneBarcodeField } from "@web/views/fields/many2one_barcode/many2one_barcode_field";
 import { SaleOrderLineProductField } from "@sale/js/sale_product_field/sale_product_field";
 import { SalePackagingSelectionDialog } from "@ff_pos_packaging_sale/sale/packaging_selection_dialog";
 
@@ -89,5 +90,40 @@ patch(SaleOrderLineProductField.prototype, {
 
     _ffUomContained(uom, base) {
         return uom.factor && base?.factor ? uom.factor / base.factor : 1;
+    },
+});
+
+// The Sales Order line uses the many2one_barcode widget, not the regular
+// SaleOrderLineProductField component. Wrap its update callback so barcode
+// matches set the corresponding packaging UoM after the product is selected.
+patch(Many2OneBarcodeField.prototype, {
+    get m2oProps() {
+        const props = super.m2oProps;
+        const originalUpdate = props.update;
+        return {
+            ...props,
+            update: async (value) => {
+                const input = this.el?.querySelector("input");
+                const barcode = input?.value?.trim();
+                const result = await originalUpdate(value);
+                if (value?.id && /^\d{5,}$/.test(barcode || "")) {
+                    const [packaging] = await this.env.services.orm.searchRead(
+                        "product.uom",
+                        [["barcode", "=", barcode], ["product_id", "=", value.id]],
+                        ["uom_id"],
+                        { limit: 1 }
+                    );
+                    if (packaging?.uom_id?.[0]) {
+                        await this.props.record.update({
+                            product_uom_id: {
+                                id: packaging.uom_id[0],
+                                display_name: packaging.uom_id[1],
+                            },
+                        });
+                    }
+                }
+                return result;
+            },
+        };
     },
 });
