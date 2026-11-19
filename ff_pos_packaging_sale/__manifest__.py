@@ -1,7 +1,7 @@
 # Part of Flous Flow. See LICENSE file for full copyright and licensing details.
 {
     'name': 'POS Packaging Sale',
-    'version': '20.0.1.0.9',
+    'version': '20.0.1.0.10',
     'category': 'Sales/Point of Sale',
     'summary': 'Sell packaging barcodes directly in POS and choose units in Sales',
     'description': """
@@ -36,6 +36,8 @@ Key principles:
     ],
     'assets': {
         'point_of_sale._assets_pos': [
+            'ff_pos_packaging_sale/static/src/sale/packaging_selection_dialog.js',
+            'ff_pos_packaging_sale/static/src/sale/packaging_selection_dialog.xml',
             'ff_pos_packaging_sale/static/src/app/**/*',
         ],
         'web.assets_backend': [
