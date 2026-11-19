@@ -16,3 +16,11 @@
 - Change: Capture the typed packaging barcode at autocomplete selection and carry it on the actual `SaleLabelTextField` instance through product-template update; set the packaging UoM after Odoo completes its standard product/configurator update.
 - Verification: On the live `aghsan` database, typed `33333333` into the sales-line product search, selected `[0034456] 890 جودي بدون غطاء شد 10`, and confirmed the line changed from base UoM `ربطة` to `كرتون`; the price recalculated from 28.00 to 280.00 for the 10-unit carton. Odoo service is active and module version 20.0.1.0.7 is installed. JavaScript syntax and `git diff --check` passed.
 - Safety/boundary: No quotation was confirmed. UI testing left empty draft quotes visible in Sales (S00007–S00009); they were not deleted because permanently deleting production records requires explicit approval. POS and Purchase barcode flows were not retested in this sales-focused fix.
+
+## 2026-11-19 — Resolve fast packaging-barcode Enter in Sales
+
+- Module/version: `ff_pos_packaging_sale` 20.0.1.0.9.
+- Root cause: Odoo's `AccountLabelTextField` delays syncing the description textarea into its autocomplete input by 200 ms. When Enter was pressed immediately after typing a numeric packaging barcode, the extension read the still-empty autocomplete input, so native handling committed the digits as description text.
+- Change: Read the first line directly from the Sales description textarea on Enter, resolve an exact unique packaging barcode, select its product template, and apply the packaging UoM after Odoo's normal template update completes. If the exact barcode does not resolve uniquely, preserve native product autocomplete behavior.
+- Verification: Reproduced the immediate-Enter failure on the live sales form; updated the patch and repeated the action against barcode `33333333`. The resulting line selected `[0034456] 890 جودي بدون غطاء شد 10`, UoM `كرتون` (factor 10), and price 250.00. Database mapping confirms barcode `33333333` uniquely maps to product 18638 / template 18633 and UoM 5282 (`كرتون`). Odoo service active; JavaScript syntax and `git diff --check` passed.
+- Boundary: No quotation was confirmed. Several test lines/drafts from repeated production UI trials remain visible; they were not deleted. POS and Purchase flows were not retested in this Sales-focused fix.

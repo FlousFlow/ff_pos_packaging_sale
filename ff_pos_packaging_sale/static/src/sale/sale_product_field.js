@@ -23,23 +23,41 @@ patch(Many2XAutocomplete.prototype, {
 
 patch(SaleLabelTextField.prototype, {
     async updateMany2XProduct(record) {
-        const barcode = ffPackagingSearchBarcode;
-        this._ffPackagingSearchBarcode = /^\d{5,}$/.test(barcode || "") ? barcode : null;
+        const barcode = ffPackagingSearchBarcode || this._ffPackagingSearchBarcode;
+        this._ffPackagingSearchBarcode = /^\d{4,}$/.test(barcode || "") ? barcode : null;
+        const hasPackagingBarcode = Boolean(this._ffPackagingSearchBarcode);
         ffPackagingSearchBarcode = null;
-        return super.updateMany2XProduct(...arguments);
+        const result = await super.updateMany2XProduct(...arguments);
+        if (hasPackagingBarcode && this._ffPackagingTemplateUpdate) {
+            await this._ffPackagingTemplateUpdate;
+        }
+        return result;
     },
 
     async _onProductTemplateUpdate() {
-        await super._onProductTemplateUpdate(...arguments);
-        const barcode = this._ffPackagingSearchBarcode;
-        this._ffPackagingSearchBarcode = null;
-        const template = this.props.record.data.product_template_id;
-        if (!barcode || !template?.id) {
-            return;
+        const pendingUpdate = (async () => {
+            await super._onProductTemplateUpdate(...arguments);
+            const barcode = this._ffPackagingSearchBarcode;
+            this._ffPackagingSearchBarcode = null;
+            const template = this.props.record.data.product_template_id;
+            if (barcode && template?.id) {
+                await this._ffApplyPackagingBarcode(template.id, barcode);
+            }
+        })();
+        this._ffPackagingTemplateUpdate = pendingUpdate;
+        try {
+            await pendingUpdate;
+        } finally {
+            if (this._ffPackagingTemplateUpdate === pendingUpdate) {
+                this._ffPackagingTemplateUpdate = null;
+            }
         }
+    },
+
+    async _ffApplyPackagingBarcode(templateId, barcode) {
         const [packaging] = await this.orm.searchRead(
             "product.uom",
-            [["barcode", "=", barcode], ["product_id.product_tmpl_id", "=", template.id]],
+            [["barcode", "=", barcode], ["product_id.product_tmpl_id", "=", templateId]],
             ["uom_id"],
             { limit: 1 }
         );
@@ -51,6 +69,60 @@ patch(SaleLabelTextField.prototype, {
                 },
             });
         }
+    },
+
+    async _ffSelectPackagingBarcode(barcode) {
+        if (!this.canEditProduct || !/^\d{4,}$/.test(barcode || "")) {
+            return false;
+        }
+        const textarea = this.textareaRef();
+        const currentLabel = this.getFirstLine(textarea?.value);
+        if (currentLabel !== barcode) {
+            return false;
+        }
+        const [packaging, ...extraMatches] = await this.orm.searchRead(
+            "product.uom",
+            [["barcode", "=", barcode], ["product_id.product_tmpl_id.sale_ok", "=", true]],
+            ["product_id"],
+            { limit: 2 }
+        );
+        if (!packaging || extraMatches.length || this.getFirstLine(textarea?.value) !== barcode) {
+            return false;
+        }
+        const productId = packaging.product_id?.[0];
+        if (!productId) {
+            return false;
+        }
+        const [product] = await this.orm.read("product.product", [productId], ["product_tmpl_id"]);
+        const templateId = product?.product_tmpl_id?.[0];
+        if (!templateId || this.getFirstLine(textarea?.value) !== barcode) {
+            return false;
+        }
+        const [template] = await this.orm.read("product.template", [templateId], ["display_name"]);
+        if (!template) {
+            return false;
+        }
+        ffPackagingSearchBarcode = barcode;
+        await this.updateMany2XProduct(template);
+        if (textarea) {
+            textarea.value = this.props.record.data[this.props.name] || "";
+            textarea.focus();
+        }
+        return true;
+    },
+
+    async onLabelKeydown(ev) {
+        if (ev.key === "Enter") {
+            const barcode = this.getFirstLine(this.textareaRef()?.value);
+            if (/^\d{4,}$/.test(barcode || "")) {
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+                if (await this._ffSelectPackagingBarcode(barcode)) {
+                    return;
+                }
+            }
+        }
+        return super.onLabelKeydown(...arguments);
     },
 });
 
